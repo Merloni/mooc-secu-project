@@ -1,4 +1,4 @@
-#Project for cyber security mooc
+# Project for cyber security mooc
 
 
 Should run the seed_db.py file located in the flaws folder in order

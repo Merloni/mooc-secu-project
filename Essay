@@ -1,16 +1,60 @@
-LINK: link to the repository
-installation instructions if needed
+LINK: https://github.com/Merloni/mooc-secu-project
+Standard django setup. Run the seed_db.py file inside moocproject/flaws for database seeding. The app requires logging in and it uses the same
+username/password combinations that are also used in the mooc tasks:
 
-FLAW 1:
-description of flaw 1...
-how to fix it...
+alice:redqueen
+bob:squarepants
+admin:admin
 
-FLAW 2:
-description of flaw 2...
-how to fix it...
+FLAW 1: SQL injection
+In the first div in the app there is an input field that allows the user to search for other users.
+Its functionality is pretty much useless as it only provides the id of the user. An SQL injection can be made with it by using a UNION SQL clause.
+Under the input field there is a list of potential users which can be searched to show the "intended" behaviour.
+Input such as admin' UNION select password from auth_user' ends up giving all the passwords in the system for example although hashed.
 
-...
+SQL injection can be fixed by making sure that the input data is properly escaped before passing it into a database. In our case for example if the search is made
+through an ORM that does the sanitation for us we can simply use that: pass the query as a filter to the proper model and search through there. If there is a reason
+for the user to actually have direct access to the database, then we need to make sure that they are only authored to do the things we want to allow them to do.
 
-FLAW 5:
-description of flaw 5...
-how to fix it...
+FLAW 2: BROKEN AUTHENTICATION (session)
+
+The system uses a session-id system that is extremely easy to figure out. With this system in place any resources that require the user to have the session id of a user are
+compromised as its easy to brute force through the potential options and fetch the resources when the correct one is found.
+
+The session id would firstly need to be lengthy enough so that a brute force attack is no longer feasible. It's key for the session id should also be changed to a generic one so that its harder
+for a malicious site viewer to figure out which technologies have been used in creation of the site. The most important thing for the id is for it to be random enough to prevent guessing attacks.
+Currently our system does none of these. The pattern is extremely easy to figure out, the key can lead the malicious user to django and the length of the key is never more than two digits.
+
+FLAW 3: SENSITIVE DATA EXPOSURE
+
+Now this security risk is pretty broad in spectrum and it is quite vague to say what should be shown and what not, especially in a site like this where there isn't really a lot to do. If we say, however
+that the user listing that is shown in our site should require the logged user to be an admin then we can assert that our site is infact not securing this resource properly.
+
+We could easily see how this kind of information would be sensitive if an admin in our case was for example a doctor looking through medical notes of their patients and patients were users who could look at
+their own information. In our current system it would mean that all users could see every other users medical information aswell.
+
+In our case the fix would be relatively simple, before showing the view for the user listing we check the request.user and make sure they are an admin and only then show them the view. If the user is not
+an admin then we can redirect them to another site and inform them with a relatively generic error message that they are not authorized to do the thing they were trying to do.
+
+
+FLAW 4: CROSS-SITE SCRIPTING(XSS)
+
+Our system has a chatting functionality that allows users to send messages and after sending see all other messages that have been sent. The messages are not escaped properly before shown to the user so
+any html or javascript that they have in them is actually ran.
+
+In our case securing this flaw is extremely trivial. We actually have to type MORE into our html to get it into a vulnerable state by saying that the message.text is safe. The fix would then be to remove the
+'|safe' part in our html and then it would be properly escaped. There are probably use cases for allowing the users to actually send html/javascript that will be ran but as it's vastly more common that this is NOT
+the case most frameworks do the escaping for the user.
+
+FLAW 5: INSUFFICIENT LOGGING & MONITORING
+
+Our system has literally no extra logging or monitoring tools apart from those that come default with django. This is obviously a slightly cheap answer to the given question from the perspective of our system but nevertheless
+an important talking point especially in a time where data breaches are becoming more and more common.
+
+Tools such as rollbar and sentry help admins and developers in keeping up with errors that happen in their system and giving a concise and localised environment for keeping up with whats going on with their system.
+Custom logging tools can also be made that can for example send systematic reports of logs that can range from system errors to more general debug statements.
+
+Several hosting platforms also provide their users with tools for monitoring the activity and usage of their system.
+
+Logging and monitoring are often neglected in order to spend more resources on development of the system, design and other such things that are seen to have more instant value. In the future this will hopefully change as we
+begin to see the destructive and interruptive power that data breaches, big and small, can have in the lives of every day people as well as corporations and even nations
