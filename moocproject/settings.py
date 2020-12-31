@@ -28,6 +28,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+SESSION_COOKIE_HTTPONLY = False
+
 
 # Application definition
 
@@ -72,6 +74,10 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "moocproject.wsgi.application"
 
+
+LOGIN_URL = "/login/"
+LOGIN_REDIRECT_URL = "/"
+SESSION_COOKIE_SAMESITE = None
 
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases

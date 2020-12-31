@@ -1,25 +1,19 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>FLAWED SITE</title>
+        <title>NOT AT ALL FLAWED SITE</title>
     </head>
 
+    <body style="padding: 5px">
 
-    <body>
-		<h1>Tuomos flaws</h1>
+		<h1>NO FLAWS IN THIS SITE</h1>
 
     <h2>Search User-table by username</h2>
-    <p>A table named flaws_account also exists. An sqlinjection can be made here. For example: <b>Tuomo'  UNION select id from flaws_account'</b><p>
-
-    <h2> List of actual users to search for</h2>
-      <ul>
-        {% for user in users %}
-        <li>{{user}}</li>
-        {% endfor %}
-      </ul>
-      <form action='injection' method="POST">
+    <p>A table named flaws_account also exists. An sqlinjection definitely cannot be made here. For example: <b>admin' UNION select password from auth_user'</b> WILL NOT DO ANYTHING<p>
+    <div style="background-color:AliceBlue">
+        <form action='/injection/' method="POST">
         {% csrf_token %}
-        <label for="injection">Injection</label></br>
+        <label for="injection">Search for user. Definitely no injection possibilities here</label></br>
         <input type="text" name="query" id="injection"/><br/>
         <input type="submit" value="Send"/>
       </form>
@@ -27,30 +21,62 @@
         <p>Your query was: {{query}}<p>
         <p> Your queryresult was: {{queryresult}}</p>
       {% endif %}
+    </div>
+    <div style="background-color:powderblue">
+      <h2> List of actual users to search for.</h2>
+      <p>Definitely hidden behind proper authorization requirements.</p>
+        <ul>
+          {% for user in users %}
+          <li>{{user}}</li>
+          {% endfor %}
+        </ul>
+    </div>
 
-    </body>
+
     </br></br>
-    <form action="information" method="GET">
-      {% csrf_token %}
-      <label for="info_search">Search user accounts</label></br>
-      <input type="text" name="user" id="info_search"/><br/>
-      <input type="submit" value="Send"/>
-    </form>
-    </br>
-    {% if accounts %}
-        <table>
+    <div style="background-color: bisque">
+      <form action="/information/" method="GET">
+        {% csrf_token %}
+        <label for="info_search">Search accounts linked to users. Only shows id and userid AND DEFINITELY MADE SO THAT IT ONLY SHOWS THE LOGGED USERS ACCOUNTS</label></br>
+        <input type="text" name="user" id="info_search"/><br/>
+        <input type="submit" value="Send"/>
+      </form>
+      </br>
+      {% if accounts %}
+          <table>
+            <tr>
+              <th>ID</th>
+              <th>Owner ID</th>
+            </tr>
+          {% for account in accounts %}
           <tr>
-            <th>ID</th>
-            <th>Owner ID</th>
+            <td>{{account.id}}</td>
+            <td>{{account.owner_id}}</td>
           </tr>
-        {% for account in accounts %}
-        <tr>
-          <td>{{account.id}}</td>
-          <td>{{account.owner_id}}</td>
-        </tr>
-        {% endfor %}
-      </table>
-    {% endif %}
-
-
+          {% endfor %}
+        </table>
+      {% endif %}
+    </div>
+    <div style="background-color: BlanchedAlmond">
+      <p>
+        XSS CHAT, add a message and all previously added messages will shown. Text is DEFINITELY sanitized and FOR SURE wont be ran if html/js is included in the chat message.
+      </p>
+      <form action="/xss/" method="POST">
+        {% csrf_token %}
+        <label for="xss">Add chat thing</label></br>
+        <input type="text" name="message" id="xss"/><br/>
+        <input type="submit" value="Send"/>
+      </form>
+      <form action="/deletexss/" method="POST">
+        {% csrf_token %}
+        <input type="submit" value="Delete all messages"/>
+      </form>
+      {% if messages %}
+        <ul>
+          {% for message in messages %}
+            <li>{{message.text|safe}}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+  </div>
   </html>
