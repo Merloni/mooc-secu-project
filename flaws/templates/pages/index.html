@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>FLAWED SITE</title>
+    </head>
+
+
+    <body>
+		<h1>Tuomos flaws</h1>
+
+    <h2>Search User-table by username</h2>
+    <p>A table named flaws_account also exists. An sqlinjection can be made here. For example: <b>Tuomo'  UNION select id from flaws_account'</b><p>
+
+    <h2> List of actual users to search for</h2>
+      <ul>
+        {% for user in users %}
+        <li>{{user}}</li>
+        {% endfor %}
+      </ul>
+      <form action='injection' method="POST">
+        {% csrf_token %}
+        <label for="injection">Injection</label></br>
+        <input type="text" name="query" id="injection"/><br/>
+        <input type="submit" value="Send"/>
+      </form>
+      {% if query %}
+        <p>Your query was: {{query}}<p>
+        <p> Your queryresult was: {{queryresult}}</p>
+      {% endif %}
+
+    </body>
+    </br></br>
+    <form action="information" method="GET">
+      {% csrf_token %}
+      <label for="info_search">Search user accounts</label></br>
+      <input type="text" name="user" id="info_search"/><br/>
+      <input type="submit" value="Send"/>
+    </form>
+    </br>
+    {% if accounts %}
+        <table>
+          <tr>
+            <th>ID</th>
+            <th>Owner ID</th>
+          </tr>
+        {% for account in accounts %}
+        <tr>
+          <td>{{account.id}}</td>
+          <td>{{account.owner_id}}</td>
+        </tr>
+        {% endfor %}
+      </table>
+    {% endif %}
+
+
+  </html>
